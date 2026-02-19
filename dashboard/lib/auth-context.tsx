@@ -3,10 +3,17 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authAPI } from './api';
 
+interface License {
+  tier_id: string;
+  status: string;
+  trial_ends_at: string | null;
+}
+
 interface User {
   id: number;
   email: string;
   full_name: string;
+  license?: License;
 }
 
 interface AuthContextType {
@@ -24,7 +31,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount
     const token = localStorage.getItem('token');
     if (token) {
       authAPI.me()

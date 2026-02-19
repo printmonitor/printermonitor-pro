@@ -25,7 +25,6 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     Register a new user account
     Automatically assigns Free tier with 14-day Pro trial
     """
-    # Check if email already exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
         raise HTTPException(
@@ -33,7 +32,6 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Create new user
     user = User(
         email=user_data.email,
         hashed_password=hash_password(user_data.password),
@@ -46,7 +44,6 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
     
-    # Auto-assign Free license with Pro trial
     license = LicenseService.create_free_license(db, user)
     
     print(f"✓ New user registered: {user.email}")
@@ -61,10 +58,8 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     """
     Login with email and password, returns JWT token
     """
-    # Find user by email
     user = db.query(User).filter(User.email == login_data.email).first()
     
-    # Verify credentials
     if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -72,18 +67,15 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Check if user is active
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is disabled"
         )
     
-    # Update last login
     user.last_login_at = datetime.utcnow()
     db.commit()
     
-    # Create access token
     access_token = create_access_token(
         data={"sub": str(user.id), "email": user.email},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -97,12 +89,34 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/me", response_model=UserResponse)
-def get_me(current_user: User = Depends(get_current_user)):
+@router.get("/me")
+def get_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """
-    Get current user profile
+    Get current user profile with license info
     """
-    return current_user
+    # Refresh to ensure license is loaded
+    db.refresh(current_user)
+    
+    response = {
+        "id": current_user.id,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "is_active": current_user.is_active,
+        "is_verified": current_user.is_verified,
+        "created_at": current_user.created_at,
+        "last_login_at": current_user.last_login_at,
+    }
+    
+    # Add license info if exists
+    if current_user.license:
+        response["license"] = {
+            "tier_id": current_user.license.tier_id,
+            "status": current_user.license.status,
+            "trial_ends_at": current_user.license.trial_ends_at,
+            "expires_at": current_user.license.expires_at,
+        }
+    
+    return response
 
 
 @router.post("/logout")

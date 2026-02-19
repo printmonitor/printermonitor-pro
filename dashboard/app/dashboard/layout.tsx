@@ -59,6 +59,12 @@ export default function DashboardLayout({
                 >
                   Devices
                 </Link>
+                <Link
+                  href="/dashboard/billing"
+                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Billing
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
