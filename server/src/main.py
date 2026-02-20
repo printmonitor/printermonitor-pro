@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .database import init_db
-from .routes import auth, devices, printers, metrics, billing, admin
+from .routes import auth, devices, printers, metrics, billing, admin, remote_subnets
 
 # Create FastAPI app
 app = FastAPI(
@@ -107,4 +107,10 @@ app.include_router(
     admin.router,
     prefix=f"{settings.API_V1_PREFIX}/admin",
     tags=["Admin"]
+)
+
+app.include_router(
+    remote_subnets.router,
+    prefix=f"{settings.API_V1_PREFIX}/remote-subnets",
+    tags=["Remote Subnets"]
 )

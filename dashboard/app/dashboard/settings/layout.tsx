@@ -29,6 +29,16 @@ export default function SettingsLayout({
             Proxy Devices
           </Link>
           <Link
+            href="/dashboard/settings/subnets"
+            className={`block px-3 py-2 rounded-md text-sm font-medium ${
+              isActive('/dashboard/settings/subnets')
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            Remote Subnets
+          </Link>
+          <Link
             href="/dashboard/settings/printers"
             className={`block px-3 py-2 rounded-md text-sm font-medium ${
               isActive('/dashboard/settings/printers')
@@ -36,7 +46,7 @@ export default function SettingsLayout({
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
-            Add Printers
+            Manual Printers
           </Link>
         </nav>
       </div>

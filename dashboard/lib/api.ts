@@ -50,3 +50,14 @@ export const devicesAPI = {
   register: (name: string, version: string) =>
     api.post('/devices/register', { name, version }),
 };
+
+// Remote Subnets API
+export const remoteSubnetsAPI = {
+  list: () => api.get('/remote-subnets'),
+  create: (subnet: string, description?: string, deviceId?: number) =>
+    api.post('/remote-subnets', { subnet, description, device_id: deviceId }),
+  update: (id: number, data: any) =>
+    api.patch(`/remote-subnets/${id}`, data),
+  delete: (id: number) =>
+    api.delete(`/remote-subnets/${id}`),
+};
