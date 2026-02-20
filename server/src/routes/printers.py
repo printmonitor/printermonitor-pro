@@ -175,3 +175,43 @@ def delete_printer(
     db.commit()
     
     print(f"✓ Printer deleted: {printer.name}")
+
+
+@router.delete("/{printer_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_printer(
+    printer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Delete a printer
+    
+    Only the owner can delete their printers
+    """
+    printer = db.query(Printer).filter(
+        Printer.id == printer_id,
+        Printer.user_id == current_user.id
+    ).first()
+    
+    if not printer:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Printer not found"
+        )
+    
+    # Store info before deletion
+    printer_name = printer.name
+    printer_ip = printer.ip
+    
+    # Delete all associated metrics first
+    db.query(PrinterMetrics).filter(
+        PrinterMetrics.printer_id == printer_id
+    ).delete()
+    
+    # Delete the printer
+    db.delete(printer)
+    db.commit()
+    
+    print(f"✓ Printer deleted: {printer_name} ({printer_ip}) by {current_user.email}")
+    
+    return None

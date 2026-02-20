@@ -17,6 +17,7 @@ interface Printer {
 export default function PrintersPage() {
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     loadPrinters();
@@ -33,6 +34,22 @@ export default function PrintersPage() {
     }
   };
 
+  const handleDelete = async (printer: Printer) => {
+    if (!confirm(`Are you sure you want to delete "${printer.name}"? This will also delete all historical metrics data.`)) {
+      return;
+    }
+
+    setDeleting(printer.id);
+    try {
+      await printersAPI.delete(printer.id);
+      await loadPrinters(); // Reload list
+    } catch (error: any) {
+      alert(error.response?.data?.detail || 'Failed to delete printer');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-12">Loading printers...</div>;
   }
@@ -45,7 +62,7 @@ export default function PrintersPage() {
           Set up your proxy device to start monitoring printers
         </p>
         <Link
-          href="/dashboard/devices"
+          href="/dashboard/settings/devices"
           className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
           Add Device
@@ -116,13 +133,20 @@ export default function PrintersPage() {
                     ? new Date(printer.last_seen_at).toLocaleString()
                     : 'Never'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                   <Link
                     href={`/dashboard/printers/${printer.id}`}
                     className="text-blue-600 hover:text-blue-900"
                   >
-                    View Details
+                    View
                   </Link>
+                  <button
+                    onClick={() => handleDelete(printer)}
+                    disabled={deleting === printer.id}
+                    className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                  >
+                    {deleting === printer.id ? 'Deleting...' : 'Delete'}
+                  </button>
                 </td>
               </tr>
             ))}

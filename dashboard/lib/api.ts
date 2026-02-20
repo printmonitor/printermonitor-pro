@@ -35,6 +35,7 @@ export const authAPI = {
 export const printersAPI = {
   list: () => api.get('/printers'),
   get: (id: number) => api.get(`/printers/${id}`),
+  delete: (id: number) => api.delete(`/printers/${id}`),
 };
 
 // Metrics API

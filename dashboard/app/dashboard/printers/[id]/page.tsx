@@ -32,6 +32,7 @@ export default function PrinterDetailPage() {
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(7);
   const [error, setError] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -42,14 +43,12 @@ export default function PrinterDetailPage() {
       setError('');
       const printerId = parseInt(params.id as string);
       
-      // Load printer info
       const printerResponse = await printersAPI.get(printerId);
       setPrinter(printerResponse.data);
 
-      // Try to load metrics (may be empty)
       try {
         const metricsResponse = await metricsAPI.history(printerId, days);
-        setMetrics(metricsResponse.data.reverse()); // Oldest first for chart
+        setMetrics(metricsResponse.data.reverse());
       } catch (metricsError: any) {
         console.log('No metrics yet:', metricsError);
         setMetrics([]);
@@ -63,6 +62,23 @@ export default function PrinterDetailPage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!printer) return;
+    
+    if (!confirm(`Are you sure you want to delete "${printer.name}"? This will also delete all historical metrics data.`)) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await printersAPI.delete(printer.id);
+      router.push('/dashboard');
+    } catch (error: any) {
+      alert(error.response?.data?.detail || 'Failed to delete printer');
+      setDeleting(false);
     }
   };
 
@@ -113,15 +129,24 @@ export default function PrinterDetailPage() {
             <h1 className="text-2xl font-bold text-gray-900">{printer.name}</h1>
             <p className="text-gray-600">{printer.model || 'Unknown Model'}</p>
           </div>
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              printer.connection_status === 'connected'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
-            }`}
-          >
-            {printer.connection_status}
-          </span>
+          <div className="flex items-center gap-3">
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                printer.connection_status === 'connected'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+              }`}
+            >
+              {printer.connection_status}
+            </span>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="px-3 py-1 rounded text-sm bg-red-100 text-red-800 hover:bg-red-200 disabled:opacity-50"
+            >
+              {deleting ? 'Deleting...' : 'Delete Printer'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -174,7 +199,6 @@ export default function PrinterDetailPage() {
 
         {chartData.length > 0 ? (
           <>
-            {/* Toner Level Chart */}
             <div className="mb-8">
               <h3 className="text-sm font-medium text-gray-700 mb-3">Toner Level Over Time</h3>
               <ResponsiveContainer width="100%" height={300}>
@@ -195,7 +219,6 @@ export default function PrinterDetailPage() {
               </ResponsiveContainer>
             </div>
 
-            {/* Page Count Chart */}
             <div>
               <h3 className="text-sm font-medium text-gray-700 mb-3">Page Count Over Time</h3>
               <ResponsiveContainer width="100%" height={300}>
@@ -226,7 +249,6 @@ export default function PrinterDetailPage() {
         )}
       </div>
 
-      {/* Last Updated */}
       {printer.last_seen_at && (
         <p className="text-sm text-gray-500 text-center">
           Last updated: {new Date(printer.last_seen_at).toLocaleString()}
