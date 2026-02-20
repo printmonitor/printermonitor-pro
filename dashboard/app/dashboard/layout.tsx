@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({
   children,
@@ -12,6 +13,7 @@ export default function DashboardLayout({
 }) {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -31,6 +33,8 @@ export default function DashboardLayout({
     return null;
   }
 
+  const isActive = (path: string) => pathname === path;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -43,27 +47,43 @@ export default function DashboardLayout({
               <div className="ml-10 flex space-x-8">
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
+                    isActive('/dashboard')
+                      ? 'text-gray-900 border-b-2 border-blue-500'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/dashboard/printers"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
+                    pathname?.startsWith('/dashboard/printers')
+                      ? 'text-gray-900 border-b-2 border-blue-500'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
                 >
                   Printers
                 </Link>
                 <Link
-                  href="/dashboard/devices"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                >
-                  Devices
-                </Link>
-                <Link
                   href="/dashboard/billing"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
+                    isActive('/dashboard/billing')
+                      ? 'text-gray-900 border-b-2 border-blue-500'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
                 >
                   Billing
+                </Link>
+                <Link
+                  href="/dashboard/settings"
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
+                    pathname?.startsWith('/dashboard/settings')
+                      ? 'text-gray-900 border-b-2 border-blue-500'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  Settings
                 </Link>
               </div>
             </div>
