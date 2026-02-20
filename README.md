@@ -2,10 +2,9 @@
 
 > **Monitor your printers in real-time. Never run out of toner unexpectedly.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Status: Beta](https://img.shields.io/badge/Status-Beta-yellow.svg)](https://prntr.org)
 
-A complete SaaS platform for monitoring SNMP-enabled printers across your network. Track toner levels, page counts, and printer status from a beautiful web dashboard.
+A complete SaaS platform for monitoring SNMP-enabled printers across your network.
 
 🌐 **Website:** [https://prntr.org](https://prntr.org) (Under Development)  
 📊 **Dashboard:** [https://app.prntr.org](https://app.prntr.org)  
@@ -13,131 +12,68 @@ A complete SaaS platform for monitoring SNMP-enabled printers across your networ
 
 ---
 
-## ✨ Features
+## 📦 Repositories
 
-### 🖨️ Real-Time Monitoring
-- Track toner levels across all printers
-- Monitor page counts and usage
-- View printer status (online/offline)
-- Automatic discovery via SNMP
+This project is split into multiple repositories:
 
-### 📊 Analytics & Insights
-- Historical metrics with interactive graphs
-- Trend analysis over 7, 30, or 90 days
-- Predict when toner will run out
-- Track printer usage patterns
-
-### 🌐 Multi-Network Support
-- Monitor printers across multiple subnets
-- Configure remote network scanning
-- Centralized dashboard for all locations
-- Support for distributed offices
-
-### 🚀 Easy Deployment
-- **One-line installer** - Get started in 5 minutes
-- Works with any SNMP-enabled printer
-- Lightweight proxy device (Raspberry Pi, Linux server)
-- Auto-updates and self-healing
-
-### 🔒 Security & Privacy
-- Self-hosted proxy keeps printer data on your network
-- Encrypted API communication (SSL/TLS)
-- JWT-based authentication
-- Role-based access control (planned)
-
-### 💳 Flexible Pricing
-- Free tier for personal use (up to 3 printers)
-- Paid tiers for businesses
-- 14-day free trial on all paid plans
-- Cancel anytime
-
----
-
-## 🏗️ Architecture
-```
-┌─────────────────┐
-│  Web Dashboard  │  (Next.js + React)
-│  app.prntr.org  │  
-└────────┬────────┘
-         │ HTTPS
-         ▼
-┌─────────────────┐
-│   Backend API   │  (FastAPI + PostgreSQL)
-│  api.prntr.org  │
-└────────┬────────┘
-         │ HTTPS
-         ▼
-┌─────────────────┐       SNMP      ┌──────────────┐
-│  Proxy Device   │ ◄──────────────► │   Printers   │
-│  (Python)       │      (Port 161)  │  (Network)   │
-└─────────────────┘                  └──────────────┘
-```
-
-**Components:**
-- **Frontend:** Next.js 16, React 18, TypeScript, Tailwind CSS
-- **Backend:** FastAPI, PostgreSQL 14, JWT auth, Stripe integration
-- **Proxy:** Python 3.10, SNMP (pysnmp), SQLite buffer
-- **Infrastructure:** Linux VPS, Nginx, SSL (Let's Encrypt)
+- **[printermonitor-proxy](https://github.com/printmonitor/printermonitor-proxy)** (Public) - Open source monitoring proxy device
+- **printermonitor-api** (Private) - Backend API service
+- **printermonitor-dashboard** (Private) - Web dashboard application
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Linux device on same network as printers (Raspberry Pi, Ubuntu server, etc.)
-- Printers with SNMP enabled (most network printers support this)
-- SNMP community string (usually "public")
-
 ### Installation
 
-1. **Create an account** at [https://app.prntr.org/register](https://app.prntr.org/register) *(when launched)*
-
+1. **Sign up** at [app.prntr.org/register](https://app.prntr.org/register) *(when launched)*
 2. **Get your API key** from Settings → Proxy Devices
-
 3. **Install the proxy** on a Linux device:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/printmonitor/printermonitor-pro/main/proxy/install.sh | sudo bash -s YOUR_API_KEY
+curl -fsSL https://raw.githubusercontent.com/printmonitor/printermonitor-proxy/main/install.sh | sudo bash -s YOUR_API_KEY
 ```
 
-4. **Done!** Your printers will appear in the dashboard automatically.
+4. **Done!** Printers appear in your dashboard automatically.
 
 ---
 
-## 📖 Documentation
+## ✨ Features
 
-### Manual Printer Registration
+### 🖨️ Real-Time Monitoring
+- Track toner levels across all printers
+- Monitor page counts and usage patterns
+- View printer status (online/offline)
+- Automatic SNMP discovery
 
-If you need to monitor printers on a different subnet:
-```bash
-curl -X POST https://api.prntr.org/api/v1/printers \
-  -H "X-API-Key: YOUR_DEVICE_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "ip": "192.168.1.100",
-    "name": "Office Printer",
-    "location": "Building A",
-    "model": "HP LaserJet Pro"
-  }'
-```
+### 📊 Analytics & Insights
+- Historical metrics with interactive graphs
+- Trend analysis (7, 30, 90 days)
+- Predict when toner will run out
+- Usage optimization recommendations
 
-### Remote Subnet Scanning
+### 🌐 Multi-Network Support
+- Monitor printers across multiple subnets
+- Remote network scanning
+- Centralized dashboard for all locations
+- Support for distributed offices
 
-Add remote subnets via the dashboard:
-1. Go to Settings → Remote Subnets
-2. Add subnet in CIDR notation (e.g., `192.168.2.0/24`)
-3. Proxy will automatically scan and register printers
+### 🚀 Easy Deployment
+- **One-line installer** - 5 minute setup
+- Works with any SNMP-enabled printer
+- Runs on Raspberry Pi or any Linux device
+- Auto-updates and self-healing
 
-### Checking Proxy Status
-```bash
-# View service status
-sudo systemctl status printermonitor-proxy
+### 🔒 Security & Privacy
+- Self-hosted proxy (data stays on your network)
+- Encrypted API communication (SSL/TLS)
+- JWT-based authentication
+- Secure key management
 
-# View logs
-sudo journalctl -u printermonitor-proxy -f
-
-# Restart service
-sudo systemctl restart printermonitor-proxy
-```
+### 💳 Flexible Pricing
+- **Free tier** for personal use (3 printers)
+- **Paid tiers** for businesses
+- **14-day free trial** on all paid plans
+- Cancel anytime, no contracts
 
 ---
 
@@ -156,96 +92,59 @@ sudo systemctl restart printermonitor-proxy
 
 ---
 
-## 🛠️ Development
-
-### Local Development Setup
-
-#### Backend
-```bash
-cd server
-python -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-pip install -r requirements.txt
-
-# Set up database
-createdb printermonitor
-cp .env.example .env
-# Edit .env with your settings
-
-# Run migrations
-python -m alembic upgrade head
-
-# Start server
-uvicorn src.main:app --reload
+## 🏗️ Architecture
+```
+┌─────────────────┐
+│  Web Dashboard  │  Next.js + React
+│  app.prntr.org  │  (Private Repo)
+└────────┬────────┘
+         │ HTTPS
+         ▼
+┌─────────────────┐
+│   Backend API   │  FastAPI + PostgreSQL
+│  api.prntr.org  │  (Private Repo)
+└────────┬────────┘
+         │ HTTPS
+         ▼
+┌─────────────────┐       SNMP      ┌──────────────┐
+│  Proxy Device   │ ◄──────────────► │   Printers   │
+│  (Open Source)  │    (Port 161)    │  (Network)   │
+└─────────────────┘                  └──────────────┘
 ```
 
-#### Frontend
-```bash
-cd dashboard
-npm install
-cp .env.example .env.local
-# Edit .env.local with API URL
-
-# Start dev server
-npm run dev
-```
-
-#### Proxy
-```bash
-cd proxy
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Configure
-cp .env.example .env
-# Edit .env with your settings
-
-# Run once
-python src/main.py once
-
-# Run continuously
-python src/main.py loop
-```
+**Tech Stack:**
+- **Frontend:** Next.js 16, React 18, TypeScript, Tailwind CSS
+- **Backend:** FastAPI, PostgreSQL 14, Stripe
+- **Proxy:** Python 3.10, SNMP (pysnmp)
+- **Infrastructure:** Linux VPS, Nginx, Let's Encrypt
 
 ---
 
-## 📁 Project Structure
-```
-printermonitor-pro/
-├── server/              # Backend API (FastAPI)
-│   ├── src/
-│   │   ├── routes/      # API endpoints
-│   │   ├── models/      # Database models
-│   │   ├── schemas/     # Pydantic schemas
-│   │   └── auth/        # Authentication
-│   └── requirements.txt
-├── dashboard/           # Frontend (Next.js)
-│   ├── app/             # App router pages
-│   ├── lib/             # API client & utilities
-│   └── package.json
-├── proxy/               # Monitoring proxy (Python)
-│   ├── src/
-│   │   ├── monitoring/  # SNMP monitoring
-│   │   ├── storage/     # Cloud & local storage
-│   │   └── discovery/   # Network scanning
-│   ├── install.sh       # One-line installer
-│   └── requirements.txt
-└── landing/             # Landing page
-    └── index.html
-```
+## 📖 Documentation
+
+### For Users
+- [Installation Guide](docs/installation.md) *(coming soon)*
+- [User Guide](docs/user-guide.md) *(coming soon)*
+- [Troubleshooting](docs/troubleshooting.md) *(coming soon)*
+
+### For Developers
+- [API Documentation](docs/api.md) *(coming soon)*
+- [Contributing Guide](docs/contributing.md) *(coming soon)*
+- See individual repositories for setup instructions
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions to the **proxy device** (open source)!
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+1. Fork [printermonitor-proxy](https://github.com/printmonitor/printermonitor-proxy)
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
 5. Open a Pull Request
+
+For API or Dashboard contributions, please contact us.
 
 ---
 
@@ -258,56 +157,52 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - [ ] Email/SMS alerts
 - [ ] Mobile app (iOS/Android)
 - [ ] Slack/Teams integration
-- [ ] Advanced analytics
+- [ ] Advanced analytics & ML predictions
 - [ ] Multi-user organizations
 - [ ] White-label option
 
 ---
 
-## 🐛 Known Issues
+## ⚠️ Status
 
-- Remote subnet scanning requires manual printer registration (auto-discovery coming soon)
-- Limited to SNMP v2c (v3 support planned)
-- Email notifications not yet implemented
+**Currently under development - Not accepting customers yet.**
 
----
+We're actively building and testing the platform. Launch is planned for **Q2 2026**.
 
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- Built with [FastAPI](https://fastapi.tiangolo.com/)
-- Frontend powered by [Next.js](https://nextjs.org/)
-- SNMP monitoring via [pysnmp](https://github.com/pysnmp/pysnmp)
-- Charts by [Recharts](https://recharts.org/)
+⭐ Star this repo to follow our progress!
 
 ---
 
 ## 📞 Support
 
-- 📧 Email: support@prntr.org *(coming soon)*
-- 🐛 Issues: [GitHub Issues](https://github.com/printmonitor/printermonitor-pro/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/printmonitor/printermonitor-pro/discussions)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/printmonitor/printermonitor-pro/issues)
+- 💬 **Discussions:** [GitHub Discussions](https://github.com/printmonitor/printermonitor-pro/discussions)
+- 📧 **Email:** support@prntr.org *(coming soon)*
 
 ---
 
-## ⚠️ Status
+## 📜 License
 
-**This project is currently under development and not accepting customers yet.**
+- **Proxy Device:** MIT License (Open Source)
+- **API & Dashboard:** Proprietary
 
-We're actively building and testing the platform. Launch is planned for Q2 2026.
+See individual repositories for details.
 
-Star this repo to follow our progress! ⭐
+---
+
+## 🙏 Acknowledgments
+
+Built with amazing open source tools:
+- [FastAPI](https://fastapi.tiangolo.com/) - Modern Python web framework
+- [Next.js](https://nextjs.org/) - React framework
+- [pysnmp](https://github.com/pysnmp/pysnmp) - SNMP library
+- [Recharts](https://recharts.org/) - React charting library
 
 ---
 
 <div align="center">
 
-**[Website](https://prntr.org)** • **[Dashboard](https://app.prntr.org)** • **[Documentation](https://docs.prntr.org)** *(coming soon)*
+**[Website](https://prntr.org)** • **[Dashboard](https://app.prntr.org)** • **[Proxy (Open Source)](https://github.com/printmonitor/printermonitor-proxy)**
 
 Made with ❤️ for IT professionals everywhere
 
