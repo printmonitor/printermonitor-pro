@@ -31,6 +31,7 @@ export default function PrinterDetailPage() {
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(7);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadData();
@@ -38,20 +39,28 @@ export default function PrinterDetailPage() {
 
   const loadData = async () => {
     try {
+      setError('');
       const printerId = parseInt(params.id as string);
       
-      const [printerResponse, metricsResponse] = await Promise.all([
-        printersAPI.get(printerId),
-        metricsAPI.history(printerId, days)
-      ]);
-
+      // Load printer info
+      const printerResponse = await printersAPI.get(printerId);
       setPrinter(printerResponse.data);
-      setMetrics(metricsResponse.data.reverse()); // Oldest first for chart
+
+      // Try to load metrics (may be empty)
+      try {
+        const metricsResponse = await metricsAPI.history(printerId, days);
+        setMetrics(metricsResponse.data.reverse()); // Oldest first for chart
+      } catch (metricsError: any) {
+        console.log('No metrics yet:', metricsError);
+        setMetrics([]);
+      }
     } catch (error: any) {
       if (error.response?.status === 404) {
         router.push('/dashboard');
+      } else {
+        setError('Failed to load printer data');
+        console.error('Failed to load printer:', error);
       }
-      console.error('Failed to load printer:', error);
     } finally {
       setLoading(false);
     }
@@ -59,6 +68,20 @@ export default function PrinterDetailPage() {
 
   if (loading) {
     return <div className="text-center py-12">Loading printer...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 mb-4">{error}</p>
+        <button
+          onClick={() => router.back()}
+          className="text-blue-600 hover:text-blue-700"
+        >
+          ← Go Back
+        </button>
+      </div>
+    );
   }
 
   if (!printer) {
@@ -73,7 +96,7 @@ export default function PrinterDetailPage() {
     pages: m.total_pages,
   }));
 
-  const latestMetric = metrics[metrics.length - 1];
+  const latestMetric = metrics.length > 0 ? metrics[metrics.length - 1] : null;
 
   return (
     <div>
@@ -121,12 +144,14 @@ export default function PrinterDetailPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <p className="text-sm text-gray-600 mb-1">Toner Level</p>
           <p className="text-xl font-bold text-gray-900">
-            {latestMetric?.toner_level_pct !== null ? `${latestMetric.toner_level_pct}%` : 'N/A'}
+            {latestMetric?.toner_level_pct !== null && latestMetric?.toner_level_pct !== undefined
+              ? `${latestMetric.toner_level_pct}%`
+              : 'N/A'}
           </p>
         </div>
       </div>
 
-      {/* Time Range Selector */}
+      {/* Metrics Section */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Metrics History</h2>
@@ -192,7 +217,12 @@ export default function PrinterDetailPage() {
             </div>
           </>
         ) : (
-          <p className="text-center text-gray-600 py-8">No historical data available</p>
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-2">No metrics data available yet</p>
+            <p className="text-sm text-gray-500">
+              The proxy device will collect data every 5 minutes. Check back soon!
+            </p>
+          </div>
         )}
       </div>
 
